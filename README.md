@@ -1,7 +1,7 @@
 #Cerca Digital para Gestão de Pastoreio e Monitorização Remota de Animais
 
-> Projeto Final de Curso — Instituto Politécnico de Castelo Branco (IPCB)  
-> Autora: Letícia Pontes Síndica | Orientador: Prof. Pedro Torres | 2026
+> Projeto Final de Curso — Instituto Politécnico de Castelo Branco (IPCB-2026)  
+> Autora: Letícia Pontes Síndica  
 
 ##  Descrição
 
