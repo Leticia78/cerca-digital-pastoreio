@@ -37,7 +37,7 @@ A coleira inteligente instalada no animal transmite continuamente a sua localiza
 - **Protocolo:** LoRaWAN 1.0.3
 - **Activação:** OTAA (Over-The-Air Activation)
 - **Payload:** 15 bytes binários
-- **DevEUI:**xxxxxxxxxxx
+- **DevEUI:**Ocultar DevEUI**
 - **Encriptação:** xxxxxxxxxx
 
 ### Estrutura do Payload (15 bytes)
