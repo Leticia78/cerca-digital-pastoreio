@@ -7,11 +7,11 @@
 
 Sistema IoT completo de **cerca digital (virtual fencing)** para monitorização remota de animais em pastoreio extensivo, sem necessidade de cercas físicas.
 
-A coleira inteligente instalada no animal transmite continuamente a sua localização GPS via **LoRaWAN EU868**, sendo os dados processados em tempo real no **Node-RED**, armazenados no **InfluxDB** e visualizados no **Grafana** com alertas automáticos por email quando o animal ultrapassa os limites definidos.
+O nó terminal  instalado no animal transmite continuamente a sua localização GPS via **LoRaWAN EU868**, sendo os dados processados em tempo real no **Node-RED**, armazenados no **InfluxDB** e visualizados no **Grafana** com alertas automáticos por email quando o animal ultrapassa os limites definidos.
 
 ## Arquitetura do Sistema
 
-[Coleira ESP32-S3 + GPS + LoRa]-[Geofencing Ray Casting]
+[ESP32-S3 + GPS + LoRa]-[Geofencing Ray Casting]
         ↓ LoRaWAN 868 MHz
 [Gateway Advantech WISE-6610 V2]
         ↓ MQTT (HiveMQ) — tópico: uplink/xxxxxx
