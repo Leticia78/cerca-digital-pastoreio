@@ -10,37 +10,9 @@ Complete IoT system for digital fencing (virtual fencing) for remote monitoring 
 
 The terminal node installed on the animal continuously transmits its GPS location via LoRaWAN EU868, with data processed in real time in Node-RED, stored in InfluxDB and visualised in Grafana with automatic email alerts when the animal exceeds the defined boundaries.
 
-System Architecture
+## System Architecture — 4-Layer Overview
 
-## System Architecture
-
-
-┌─────────────────────────────────────┐
-│     LilyGO T-Beam Supreme ESP32-S3  │
-│     GPS + LoRa SX1262               │
-│     Ray Casting Geofencing          │
-└──────────────┬──────────────────────┘
-               │ LoRaWAN 868 MHz
-               ▼
-┌─────────────────────────────────────┐
-│   Gateway Advantech WISE-6610 V2    │
-│   LoRaWAN Concentrator SX1302       │
-└──────────────┬──────────────────────┘
-               │ MQTT — HiveMQ
-               │ topic: uplink/xxxxxx
-               ▼
-┌─────────────────────────────────────┐
-│            Node-RED                 │
-│   Ray Casting Geofencing            │
-│   Decoder + Alerts + Email          │
-└──────────┬──────────────────────────┘
-           │
-           ▼
-┌──────────────────┐     ┌────────────────────┐
-│   InfluxDB 2.x   │────▶│  Grafana Dashboard │
-│ MonitorizacaoAni │     │  Geomap + Gauges   │
-│ mais_V2          │     │  Alerts via Email  │
-└──────────────────┘     └────────────────────┘
+![4-Layer System Architecture](docs/images/camadas.png)
 
 Hardware Used
 
@@ -97,13 +69,19 @@ Locally on the ESP32 for immediate buzzer activation
 In Node-RED for remote alerts and database logging
 
 Software and Platforms
+
 Node-RED
+
 MQTT Broker: Public HiveMQ, topic xxxxxxxx
+
 Main nodes: MQTT In → JSON → Geofencing Ray Casting → InfluxDB + Worldmap
 
-InfluxDB 2.x
+#InfluxDB 2.x
+
 Organisation: CercaDigital
+
 Bucket: MonitorizacaoAnimais_V2
+
 Measurement: animal
 
 #Grafana
