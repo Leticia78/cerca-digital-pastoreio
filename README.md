@@ -52,6 +52,8 @@ The terminal node installed on the animal continuously transmits its GPS locatio
 
 Geofencing Algorithm — Ray Casting
 
+![Ray Casting Geofencing Algorithm](docs/images/raycasting.png)
+
 The detection of an animal’s position relative to the boundaries of the digital fence is performed using an algorithm called Ray Casting, widely used in geofencing systems for being computationally efficient and suitable for resource-constrained devices.
 
 The operating principle of the algorithm is based on the current position of the animal (defined by the GPS coordinates of latitude and longitude). An imaginary horizontal line (ray) is cast to the right. The system counts how many times this ray intersects the segments that form the perimeter of the digital fence (polygon). If the number of intersections is odd, the animal is inside the fence; if it is even (including zero), the animal is outside.
