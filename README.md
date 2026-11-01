@@ -1,98 +1,99 @@
-#Cerca Digital para Gestão de Pastoreio e Monitorização Remota de Animais
+Cerca Digital para Gestão de Pastoreio e Monitorização Remota de Animais
 
-> Projeto Final de Curso — Universidade Politécnica de Castelo Branco (UPCB-2026)  
-> Autora: Letícia Pontes Síndica  
+Final Course Project — Instituto Politécnico de Castelo Branco (IPCB-2026)
+Author: Letícia Pontes Síndica
 
-##  Descrição
+Description
 
-Sistema IoT completo de **cerca digital (virtual fencing)** para monitorização remota de animais em pastoreio extensivo, sem necessidade de cercas físicas.
+Complete IoT system for digital fencing (virtual fencing) for remote monitoring of animals in extensive grazing, without the need for physical fences.
 
-O nó terminal  instalado no animal transmite continuamente a sua localização GPS via **LoRaWAN EU868**, sendo os dados processados em tempo real no **Node-RED**, armazenados no **InfluxDB** e visualizados no **Grafana** com alertas automáticos por email quando o animal ultrapassa os limites definidos.
+The terminal node installed on the animal continuously transmits its GPS location via LoRaWAN EU868, with data processed in real time in Node-RED, stored in InfluxDB and visualised in Grafana with automatic email alerts when the animal exceeds the defined boundaries.
 
-## Arquitetura do Sistema
-
-[ESP32-S3 + GPS + LoRa]-[Geofencing Ray Casting]
+System Architecture
+[ESP32-S3 + GPS + LoRa] — [Geofencing Ray Casting]
         ↓ LoRaWAN 868 MHz
 [Gateway Advantech WISE-6610 V2]
-        ↓ MQTT (HiveMQ) — tópico: uplink/xxxxxx
+        ↓ MQTT (HiveMQ) — topic: uplink/xxxxxx
 [Node-RED — Geofencing Ray Casting]
         ↓
 [InfluxDB 2.x] → [Grafana Dashboard]
+Hardware Used
+Component	Description
+LilyGO TTGO T-Beam Supreme	ESP32-S3
+DHT22	Temperature and humidity sensor (GPIO2)
+LM35	Analogue temperature sensor (GPIO3)
+Buzzer	Audible alert (GPIO39)
+Advantech WISE-6610 V2	Industrial LoRaWAN gateway (SX1302 concentrator)
+FST 18650 Battery	2600 mAh, 3.6V/4.2V
 
+LoRaWAN Communication
+Band: EU868 (868 MHz, unlicensed ISM)
+Protocol: LoRaWAN 1.0.3
+Activation: OTAA (Over-The-Air Activation)
+Payload: 15 binary bytes
+DevEUI: Configure in firmware/config.h
+Encryption: AES-128
 
-## Hardware Utilizado
+Payload Structure (15 bytes)
+Bytes	Field	Type
+0–3	Latitude	int32
+4–7	Longitude	int32
+8–9	Distance to fence	int16
+10	Speed	uint8
+11	Satellites	uint8
+12	GPS Fix	uint8
+13	Alert State	uint8
+14	Temperature	int8
 
-| Componente | Descrição |
-|---|---|
-| LilyGO TTGO T-Beam Supreme | ESP32-S3 
-| DHT22 | Sensor de temperatura e humidade (GPIO2) |
-| LM35 | Sensor de temperatura analógico (GPIO3) |
-| Buzzer | Alerta sonoro (GPIO39) |
-| Advantech WISE-6610 V2 | Gateway LoRaWAN industrial (concentrador SX1302) | 
-| Bateria FST 18650 | 2600 mAh, 3.6V/4.2V |
+Geofencing — Ray Casting
 
-##  Comunicação LoRaWAN
+The Ray Casting algorithm verifies in real time whether the animal is inside or outside the digital perimeter:
 
-- **Banda:** EU868 (868 MHz, ISM não licenciada)
-- **Protocolo:** LoRaWAN 1.0.3
-- **Activação:** OTAA (Over-The-Air Activation)
-- **Payload:** 15 bytes binários
-- **DevEUI:**Ocultar DevEUI**
-- **Encriptação:** xxxxxxxxxx
+🟢 State 0 — Animal safe, inside the fence → silence
+🟡 State 1 — Animal within 15 m of the boundary → 10 beeps
+🔴 State 2 — Animal outside the fence → 20 beeps + automatic email
 
-### Estrutura do Payload (15 bytes)
+Geofencing runs at two levels (redundancy):
 
-| Bytes | Campo | Tipo |
-|---|---|---|
-| 0-3 | Latitude | int32 |
-| 4-7 | Longitude | int32 |
-| 8-9 | Distância à cerca | int16 |
-| 10 | Velocidade | uint8 |
-| 11 | Satélites | uint8 |
-| 12 | GPS Fix | uint8 |
-| 13 | Estado Alerta | uint8 |
-| 14 | Temperatura | int8 |
+Locally on the ESP32 for immediate buzzer activation
+In Node-RED for remote alerts and database logging
 
+Software and Platforms
+Node-RED
+MQTT Broker: Public HiveMQ, topic xxxxxxxx
+Main nodes: MQTT In → JSON → Geofencing Ray Casting → InfluxDB + Worldmap
 
-## Geofencing — Ray Casting
+InfluxDB 2.x
+Organisation: CercaDigital
+Bucket: MonitorizacaoAnimais_V2
+Measurement: animal
 
-O algoritmo **Ray Casting** verifica em tempo real se o animal está dentro ou fora do perímetro digital:
+Grafana
+Dashboard: Cerca Digital_Coleira
+Panels: Geomap, Gauges (temp / humidity / satellites), Time Series, GPS Fix
+Alerts: SMTP Gmail port 587, evaluation every 10 seconds
 
- **Estado 0 🟢** — Animal seguro, dentro da cerca → silêncio
- **Estado 1 🟡** — Animal a menos de 15m do limite → 10 beeps
- **Estado 2 🔴** — Animal fora da cerca → 20 beeps + email automático
+Battery Life
+Mode	Battery Life
+Continuous (no sleep)	~11 hours
 
-O geofencing é executado em **dois níveis** (redundância):
-1. Localmente no **ESP32** para activação imediata do buzzer
-2. No **Node-RED** para alertas remotos e registo na base de dados
+Repository Structure
 
-##  Software e Plataformas
+cerca-digital-pastoreio/
+├── firmware/
+│   ├── CODIGO_CERCADIGITAL.ino
+│   └── config.h.example
+├── flows.json
+├── dashboard-1793494304853.json
+├── docs/
+│   └── images/
+├── influxdb/
+│   └── README.md
+├── .gitignore
+└── README.md
 
-### Node-RED
-- Broker MQTT: HiveMQ público, tópico `xxxxxxxx`
-- Nós principais: MQTT In → JSON → Geofencing Ray Casting → InfluxDB + Worldmap
-
-### InfluxDB 2.x
-- Organização: `CercaDigital`
-- Bucket: `MonitorizacaoAnimais_V2`
-- Measurement: `animal`
-
-### Grafana
-- Dashboard: `Cerca Digital_Coleira`
-- Painéis: Geomap, Gauges (temp/humidade/satélites), Time Series, GPS Fix
-- Alertas: SMTP Gmail porta 587, avaliação a cada 10 segundos
-
-##  Autonomia da Bateria
-
-| Modo | Autonomia |
-| Contínuo (sem sleep) | ~11 horas |
-
-
-
-## 📁 Estrutura do Repositório
-##  Capturas do Sistema
-
-###  Mapa da Cerca Digital
+System Screenshots
+ Digital Fence Map
 ![Cerca Digital](docs/images/cerca.jpeg)
 
 ###  Dispositivo ESP32-S3
