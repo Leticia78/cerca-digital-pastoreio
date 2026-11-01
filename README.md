@@ -25,13 +25,16 @@ System Architecture
 
 Hardware Used
 
-Component	Description
-LilyGO TTGO T-Beam Supreme	ESP32-S3
-DHT22	Temperature and humidity sensor (GPIO2)
-LM35	Analogue temperature sensor (GPIO3)
-Buzzer	Audible alert (GPIO39)
-Advantech WISE-6610 V2	Industrial LoRaWAN gateway (SX1302 concentrator)
-FST 18650 Battery	2600 mAh, 3.6V/4.2V
+## Hardware Used
+
+| Component | Description |
+|-----------|-------------|
+| LilyGO TTGO T-Beam Supreme | ESP32-S3 dual-core Xtensa LX7 240 MHz + LoRa SX1262 + GPS |
+| DHT22 | Temperature and humidity sensor (GPIO2) |
+| LM35 | Analogue temperature sensor (GPIO3) |
+| Buzzer | Audible alert (GPIO39) |
+| Advantech WISE-6610 V2 | Industrial LoRaWAN gateway (SX1302 concentrator) |
+| FST 18650 Battery | 2600 mAh, 3.6V/4.2V |
 
 LoRaWAN Communication
 Band: EU868 (868 MHz, unlicensed ISM)
@@ -41,24 +44,30 @@ Payload: 15 binary bytes
 DevEUI: Configure in firmware/config.h
 Encryption: AES-128
 
-Payload Structure (15 bytes)
-Bytes	Field	Type
-0–3	Latitude	int32
-4–7	Longitude	int32
-8–9	Distance to fence	int16
-10	Speed	uint8
-11	Satellites	uint8
-12	GPS Fix	uint8
-13	Alert State	uint8
-14	Temperature	int8
+## Payload Structure (15 bytes)
+
+| Bytes | Field | Type |
+|-------|-------|------|
+| 0–3   | Latitude | int32 |
+| 4–7   | Longitude | int32 |
+| 8–9   | Distance to fence | int16 |
+| 10    | Speed | uint8 |
+| 11    | Satellites | uint8 |
+| 12    | GPS Fix | uint8 |
+| 13    | Alert State | uint8 |
+| 14    | Temperature | int8 |
 
 Geofencing — Ray Casting
 
 The Ray Casting algorithm verifies in real time whether the animal is inside or outside the digital perimeter:
 
-🟢 State 0 — Animal safe, inside the fence → silence
-🟡 State 1 — Animal within 15 m of the boundary → 10 beeps
-🔴 State 2 — Animal outside the fence → 20 beeps + automatic email
+## Geofencing States
+
+| State | Indicator | Description | Alert |
+|-------|-----------|-------------|-------|
+| 0 | 🟢 Safe | Animal inside the fence | Silence |
+| 1 | 🟡 Warning | Animal within 15 m of the boundary | 10 beeps |
+| 2 | 🔴 Breach | Animal outside the fence | 20 beeps + automatic email |
 
 Geofencing runs at two levels (redundancy):
 
@@ -103,7 +112,7 @@ System Screenshots
  Digital Fence Map
 ![Cerca Digital](docs/images/cerca.jpeg)
 
-###  Dispositivo ESP32-S3
+###  ESP32-S3 device
 ![ESP32-S3](docs/images/ESP32.S3.jpeg)
 
 ###  Gateway Advantech WISE-6610
@@ -111,23 +120,23 @@ System Screenshots
 ![Gateway](docs/images/GATEWAY.L.jpeg)
 ![Gateway](docs/images/GATEWAY.jpeg)
 
-### Fluxo Node-RED
+### Node-RED Flow
 ![Fluxo Node-RED](docs/images/Fluxo.dADOS.PNG)
 
 ###  InfluxDB
 ![InfluxDB](docs/images/influxdbbb.jpeg)
 
-###  Estado — Seguro
+###  State — Secure
 ![Seguro](docs/images/seguro.jpeg)
 
-###  Estado — Zona de Risco
+###  State — Risk Zone
 ![Zona de Risco](docs/images/zona.risco.jpeg)
 
-###  Estado — Fuga
+### State — Escape
 ![Fuga](docs/images/Fuga.jpeg)
 
-###  Dashboard — Alerta
+###  Dashboard — Alert
 ![Alerta](docs/images/alertaaa.jpeg)
 
-###  Alerta por Email
+###  Email Alert
 ![Email de Alerta](docs/images/Email.alerta.PNG)
