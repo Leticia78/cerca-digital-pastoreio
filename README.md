@@ -4,12 +4,15 @@ Final Course Project — Polytechnic University of Castelo Branco (UPCB-2026)
 
 Author: Letícia Pontes Sindica
 
-Description
+## Description
 
-Complete IoT system for digital fencing (virtual fencing) for remote monitoring of animals in extensive grazing, without the need for physical fences.
+The management of animals in extensive grazing represents one of the most demanding agricultural activities in terms of surveillance and territorial control. Traditional physical fences, although widely used, present high installation and maintenance costs, do not allow dynamic reconfiguration of grazing perimeters, and lack any automatic response capability to critical events, such as the unauthorised exit of animals or their approach to sensitive areas.
 
-The terminal node installed on the animal continuously transmits its GPS location via LoRaWAN EU868, with data processed in real time in Node-RED, stored in InfluxDB and visualised in Grafana with automatic email alerts when the animal exceeds the defined boundaries.
+This work proposes an alternative solution based on the concept of **digital fencing**: an integrated electronic system that replaces physical barriers with a geographically defined digital perimeter, verified in real time by computational algorithms and capable of triggering automatic alerts on the animal's own collar when the defined boundaries are exceeded.
 
+The developed system is based on **LoRa** wireless communication technology, operating in the European **868 MHz** band according to the **LoRaWAN** protocol, and integrates a low-power terminal node based on the **LilyGO TTGO T-Beam Supreme ESP32-S3** platform. This platform includes a GNSS receiver, the **SX1262** radio transceiver, and an audible alert buzzer.
+
+The real-time data processing and visualisation infrastructure consists of the **Advantech WISE-6610 V2** industrial gateway, the **HiveMQ** MQTT broker, the **Node-RED** platform, the **InfluxDB 2.x** database, and the **Grafana** dashboard system.
 ## System Architecture — 4-Layer Overview
 
 ![4-Layer System Architecture](docs/images/camadas.png)
