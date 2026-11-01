@@ -1,7 +1,8 @@
-Cerca Digital para Gestão de Pastoreio e Monitorização Remota de Animais
+##Cerca Digital para Gestão de Pastoreio e Monitorização Remota de Animais##
 
-Final Course Project — Instituto Politécnico de Castelo Branco (IPCB-2026)
-Author: Letícia Pontes Síndica
+Final Course Project — Polytechnic University of Castelo Branco (UPCB-2026)
+
+Author: Letícia Pontes Sindica
 
 Description
 
@@ -10,14 +11,20 @@ Complete IoT system for digital fencing (virtual fencing) for remote monitoring 
 The terminal node installed on the animal continuously transmits its GPS location via LoRaWAN EU868, with data processed in real time in Node-RED, stored in InfluxDB and visualised in Grafana with automatic email alerts when the animal exceeds the defined boundaries.
 
 System Architecture
+
 [ESP32-S3 + GPS + LoRa] — [Geofencing Ray Casting]
         ↓ LoRaWAN 868 MHz
+        
 [Gateway Advantech WISE-6610 V2]
         ↓ MQTT (HiveMQ) — topic: uplink/xxxxxx
+        
 [Node-RED — Geofencing Ray Casting]
         ↓
+        
 [InfluxDB 2.x] → [Grafana Dashboard]
+
 Hardware Used
+
 Component	Description
 LilyGO TTGO T-Beam Supreme	ESP32-S3
 DHT22	Temperature and humidity sensor (GPIO2)
