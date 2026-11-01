@@ -12,16 +12,35 @@ The terminal node installed on the animal continuously transmits its GPS locatio
 
 System Architecture
 
-[ESP32-S3 + GPS + LoRa] — [Geofencing Ray Casting]
-        ↓ LoRaWAN 868 MHz
-        
-[Gateway Advantech WISE-6610 V2]
-        ↓ MQTT (HiveMQ) — topic: uplink/xxxxxx
-        
-[Node-RED — Geofencing Ray Casting]
-        ↓
-        
-[InfluxDB 2.x] → [Grafana Dashboard]
+## System Architecture
+
+
+┌─────────────────────────────────────┐
+│     LilyGO T-Beam Supreme ESP32-S3  │
+│     GPS + LoRa SX1262               │
+│     Ray Casting Geofencing          │
+└──────────────┬──────────────────────┘
+               │ LoRaWAN 868 MHz
+               ▼
+┌─────────────────────────────────────┐
+│   Gateway Advantech WISE-6610 V2    │
+│   LoRaWAN Concentrator SX1302       │
+└──────────────┬──────────────────────┘
+               │ MQTT — HiveMQ
+               │ topic: uplink/xxxxxx
+               ▼
+┌─────────────────────────────────────┐
+│            Node-RED                 │
+│   Ray Casting Geofencing            │
+│   Decoder + Alerts + Email          │
+└──────────┬──────────────────────────┘
+           │
+           ▼
+┌──────────────────┐     ┌────────────────────┐
+│   InfluxDB 2.x   │────▶│  Grafana Dashboard │
+│ MonitorizacaoAni │     │  Geomap + Gauges   │
+│ mais_V2          │     │  Alerts via Email  │
+└──────────────────┘     └────────────────────┘
 
 Hardware Used
 
@@ -36,13 +55,16 @@ Hardware Used
 | Advantech WISE-6610 V2 | Industrial LoRaWAN gateway (SX1302 concentrator) |
 | FST 18650 Battery | 2600 mAh, 3.6V/4.2V |
 
-LoRaWAN Communication
-Band: EU868 (868 MHz, unlicensed ISM)
-Protocol: LoRaWAN 1.0.3
-Activation: OTAA (Over-The-Air Activation)
-Payload: 15 binary bytes
-DevEUI: Configure in firmware/config.h
-Encryption: AES-128
+## LoRaWAN Communication
+
+| Parameter | Value |
+|-----------|-------|
+| Band | EU868 (868 MHz, unlicensed ISM) |
+| Protocol | LoRaWAN 1.0.3 |
+| Activation | OTAA (Over-The-Air Activation) |
+| Payload | 15 binary bytes |
+| DevEUI |xxxxxxxxxxx |
+| Encryption | AES-128 |
 
 ## Payload Structure (15 bytes)
 
@@ -84,31 +106,38 @@ Organisation: CercaDigital
 Bucket: MonitorizacaoAnimais_V2
 Measurement: animal
 
-Grafana
+#Grafana
+
 Dashboard: Cerca Digital_Coleira
+
 Panels: Geomap, Gauges (temp / humidity / satellites), Time Series, GPS Fix
+
 Alerts: SMTP Gmail port 587, evaluation every 10 seconds
 
-Battery Life
+#Battery Life
+
 Mode	Battery Life
+
 Continuous (no sleep)	~11 hours
 
 Repository Structure
 
-cerca-digital-pastoreio/
-├── firmware/
-│   ├── CODIGO_CERCADIGITAL.ino
-│   └── config.h.example
-├── flows.json
-├── dashboard-1793494304853.json
-├── docs/
-│   └── images/
-├── influxdb/
-│   └── README.md
-├── .gitignore
-└── README.md
+## Repository Structure
+
+| Path | Description |
+|------|-------------|
+| `firmware/CODIGO_CERCADIGITAL.ino` | Main ESP32-S3 firmware |
+| `firmware/config.h.example` | Configuration template (keys not included) |
+| `flows.json` | Node-RED flows export |
+| `dashboard-1793494304853.json` | Grafana dashboard export |
+| `docs/images/` | System screenshots |
+| `influxdb/README.md` | InfluxDB configuration details |
+| `.gitignore` | Excludes real config.h and binaries |
+| `README.md` | Project documentation |
+
 
 System Screenshots
+
  Digital Fence Map
 ![Cerca Digital](docs/images/cerca.jpeg)
 
