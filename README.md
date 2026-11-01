@@ -90,3 +90,36 @@ O geofencing é executado em **dois níveis** (redundância):
 
 
 ## 📁 Estrutura do Repositório
+##  Capturas do Sistema
+
+###  Mapa da Cerca Digital
+![Cerca Digital](docs/images/cerca.jpeg)
+
+###  Dispositivo ESP32-S3
+![ESP32-S3](docs/images/ESP32.S3.jpeg)
+
+###  Gateway Advantech WISE-6610
+![Gateway](docs/images/Gateway.LORAWAN.jpeg)
+![Gateway](docs/images/GATEWAY.L.jpeg)
+![Gateway](docs/images/GATEWAY.jpeg)
+
+### Fluxo Node-RED
+![Fluxo Node-RED](docs/images/Fluxo.dADOS.PNG)
+
+###  InfluxDB
+![InfluxDB](docs/images/influxdbbb.jpeg)
+
+###  Estado — Seguro
+![Seguro](docs/images/seguro.jpeg)
+
+###  Estado — Zona de Risco
+![Zona de Risco](docs/images/zona.risco.jpeg)
+
+###  Estado — Fuga
+![Fuga](docs/images/Fuga.jpeg)
+
+###  Dashboard — Alerta
+![Alerta](docs/images/alertaaa.jpeg)
+
+###  Alerta por Email
+![Email de Alerta](docs/images/Email.alerta.PNG)
