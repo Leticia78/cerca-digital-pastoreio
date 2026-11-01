@@ -14,7 +14,6 @@ The terminal node installed on the animal continuously transmits its GPS locatio
 
 ![4-Layer System Architecture](docs/images/camadas.png)
 
-Hardware Used
 
 ## Hardware Used
 
@@ -51,7 +50,13 @@ Hardware Used
 | 13    | Alert State | uint8 |
 | 14    | Temperature | int8 |
 
-Geofencing — Ray Casting
+Geofencing Algorithm — Ray Casting
+
+The detection of an animal’s position relative to the boundaries of the digital fence is performed using an algorithm called Ray Casting, widely used in geofencing systems for being computationally efficient and suitable for resource-constrained devices.
+
+The operating principle of the algorithm is based on the current position of the animal (defined by the GPS coordinates of latitude and longitude). An imaginary horizontal line (ray) is cast to the right. The system counts how many times this ray intersects the segments that form the perimeter of the digital fence (polygon). If the number of intersections is odd, the animal is inside the fence; if it is even (including zero), the animal is outside.
+
+In this project, the Ray Casting algorithm is implemented at two distinct and complementary levels: on the T-Beam Supreme ESP32-S3, the microcontroller locally executes the algorithm, comparing the animal’s GPS position with the coordinates of the four vertices of the digital fence.
 
 The Ray Casting algorithm verifies in real time whether the animal is inside or outside the digital perimeter:
 
@@ -63,10 +68,7 @@ The Ray Casting algorithm verifies in real time whether the animal is inside or 
 | 1 | 🟡 Warning | Animal within 15 m of the boundary | 10 beeps |
 | 2 | 🔴 Breach | Animal outside the fence | 20 beeps + automatic email |
 
-Geofencing runs at two levels (redundancy):
-
-Locally on the ESP32 for immediate buzzer activation
-In Node-RED for remote alerts and database logging
+In Node-RED (cloud processing), after receiving data via MQTT, the Node-RED flow re-executes the Ray Casting algorithm with the coordinates received via LoRaWAN, determining the fence_state (0, 1 or 2). The result is stored in InfluxDB and visualised in Grafana, where the animal's marker changes colour according to the state (green — yellow — red).
 
 Software and Platforms
 
