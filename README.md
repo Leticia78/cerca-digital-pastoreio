@@ -160,15 +160,15 @@ The image above shows the aerial view of the test area with the following elemen
 
 | Element | Description |
 |---------|-------------|
-| 🔵 Blue polygon | The digital fence perimeter defined by 4 GPS vertices between Block A and Block B |
-| 📍 Red marker | Current position of the animal (ESP32-S3 device) inside the fence |
-| 🔵 Cyan circle | GPS accuracy radius — represents the margin of uncertainty of the GNSS receiver position |
+|  Blue polygon | The digital fence perimeter defined by 4 GPS vertices between Block A and Block B |
+|  Red marker | Current position of the animal (ESP32-S3 device) inside the fence |
+|  Cyan circle | GPS accuracy radius — represents the margin of uncertainty of the GNSS receiver position |
 
 The GPS accuracy radius (cyan circle) is a fundamental indicator of signal quality: 
 the smaller the circle, the more precise the position fix. A larger radius indicates 
 reduced satellite visibility or signal interference, which may affect geofencing reliability.
 
-### 🔧 Terminal Node — LilyGO T-Beam Supreme ESP32-S3
+###  Terminal Node — LilyGO T-Beam Supreme ESP32-S3
 
 ![ESP32-S3](docs/images/ESP32.S3.jpeg)
 
@@ -208,7 +208,7 @@ Node-RED is the central data processing engine of the system. The flow above sho
 
 The debug nodes (green) allow real-time inspection of each step during development and testing.
 
-###  InfluxDB 2.x — Data Storage
+###  InfluxDB 2.x - Data Storage
 
 ![InfluxDB](docs/images/influxdbbb.jpeg)
 
@@ -229,19 +229,18 @@ All fields decoded from the LoRaWAN payload are stored as individual time-series
 
 This time-series structure allows Grafana to query and visualise all data historically and in real time.
 
-### 📊 Grafana Dashboard — Cerca Digital_Coleira
+###  Grafana Dashboard - Cerca Digital_Coleira
 
 The **Cerca Digital_Coleira** dashboard provides real-time monitoring of all animal data received from the LoRaWAN network. It is organised into 6 panels:
 
-- **Temperatura do animal** — gauge displaying the current temperature reading from the DHT22 sensor (°C), with colour thresholds from green (normal) to red (high)
-- **Humidade** — gauge displaying relative humidity (%), also colour-coded by threshold
-- **Distância ao Limite da Cerca** — gauge showing the calculated distance in metres between the animal's GPS position and the nearest    fence boundary, derived from the Ray Casting algorithm
-- **Satélite** — gauge showing the number of GPS satellites currently in view, used to assess fix quality
-- **Localização do Animal (Geomap)** — real-time map displaying the animal's position with a colour-coded marker:
- 🟢 green (safe)
- 🟡 orange (warning)
- 🔴 red (breach)
-- **Histórico de Temperatura e Humidade** — time series chart showing temperature and humidity evolution over the last 30 minutes
+| Panel | Description |
+|-------|-------------|
+| **Temperatura do animal** | Gauge displaying the current temperature reading from the DHT22 sensor (°C), with colour thresholds from green (normal) to red (high) |
+| **Humidade** | Gauge displaying relative humidity (%), colour-coded by threshold |
+| **Distância ao Limite da Cerca** | Gauge showing the calculated distance in metres between the animal's GPS position and the nearest fence boundary, derived from the Ray Casting algorithm |
+| **Satélite** | Gauge showing the number of GPS satellites currently in view, used to assess GPS fix quality |
+| **Localização do Animal (Geomap)** | Real-time map displaying the animal's position with a colour-coded marker: 🟢 green (safe) · 🟡 orange (warning) · 🔴 red (breach) |
+| **Histórico de Temperatura e Humidade** | Time series chart showing temperature and humidity evolution over the last 30 minutes |
 The dashboard auto-refreshes every **5 seconds** and queries InfluxDB with a **10-minute sliding window**.
 
 ###  Test Results
@@ -263,14 +262,14 @@ and visualised in real time on the Grafana dashboard with a 5-second refresh int
 **State 0 (Safe)** was confirmed when the animal remained inside the fence perimeter — 
 the Geomap displayed a green marker and the buzzer remained silent.
 
-###  State — Secure
+###  State - Secure
 ![Seguro](docs/images/seguro.jpeg)
 
 **State 1 (Warning)** was triggered as the device approached within 15 metres of 
 the fence boundary — the marker turned orange and the buzzer emitted 10 beeps, 
 alerting the animal before any breach occurred.
 
-###  State — Risk Zone
+###  State - Risk Zone
 ![Zona de Risco](docs/images/zona.risco.jpeg)
 
 **State 2 (Breach)** was confirmed when the device crossed outside the defined 
@@ -278,7 +277,7 @@ perimeter — the marker turned red, the buzzer emitted 20 beeps, and an automat
 email alert was received in Gmail within seconds of the breach being detected 
 by the Grafana alerting rule.
 
-### State — Escape
+### State - Escape
 ![Fuga](docs/images/Fuga.jpeg)
 
 All test cases passed successfully, confirming correct end-to-end operation 
@@ -316,4 +315,33 @@ During testing, the email alert was successfully received within seconds of the
 breach being detected, confirming the reliability of the end-to-end alert pipeline 
 from InfluxDB query to email delivery.
 
+## Conclusion
 
+This project demonstrates that it is possible to build a fully functional, 
+low-cost digital fencing system for remote animal monitoring using open-source 
+tools and off-the-shelf hardware components.
+
+The system successfully integrates four technology layers — embedded firmware, 
+LoRaWAN long-range communication, cloud data processing, and real-time 
+visualisation — into a cohesive and reliable IoT solution. The LilyGO T-Beam 
+Supreme ESP32-S3 proved to be an effective platform for this application, 
+combining GPS positioning, LoRa radio transmission, environmental sensing, 
+and local geofencing computation in a single compact device.
+
+The Ray Casting algorithm, implemented at two independent levels (on the 
+ESP32-S3 and in Node-RED), provided accurate and redundant geofencing 
+detection throughout all test sessions conducted at the EST campus of IPCB. 
+All three alert states — safe, warning, and breach — were successfully triggered 
+and verified, with automatic email notifications delivered within seconds of 
+a boundary violation being detected.
+
+The data pipeline from LoRaWAN packet reception to Grafana dashboard 
+visualisation operated continuously and reliably, with InfluxDB storing 
+all time-series records for historical analysis. The 5-second dashboard 
+refresh interval and 10-second alert evaluation cycle ensure near real-time 
+awareness of the animal's position and status.
+
+As a final year project, this work demonstrates the practical application of 
+IoT technologies — LoRaWAN, MQTT, Node-RED, InfluxDB and Grafana — to solve 
+a real agricultural problem, replacing traditional physical fences with an 
+intelligent, reconfigurable and remotely monitored digital perimeter.
