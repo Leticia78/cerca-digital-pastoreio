@@ -138,36 +138,182 @@ Repository Structure
 | `README.md` | Project documentation |
 
 
-System Screenshots
+## Test Location - EST Campus (IPCB), Castelo Branco
 
+The digital fence was delimited and tested at the **EST campus of UPCB (Escola Superior de Tecnologia)**, 
+specifically in the area between **Block A and Block B**, chosen for its open-sky conditions 
+that ensure good GPS signal quality.
+
+### GPS Fix Process
+
+Before any geofencing calculation can occur, the ESP32-S3 must obtain a valid **GPS Fix** — 
+the process by which the GNSS receiver (Quectel L76K) locks onto enough satellites to 
+calculate a reliable position. The system monitors the number of satellites in view and 
+only activates geofencing once a stable fix is confirmed, ensuring that false alerts 
+caused by inaccurate positions are avoided.
+
+### Satellite Map — Campus EST (IPCB)
  Digital Fence Map
 ![Cerca Digital](docs/images/cerca.jpeg)
 
-###  ESP32-S3 device
+The image above shows the aerial view of the test area with the following elements:
+
+| Element | Description |
+|---------|-------------|
+| 🔵 Blue polygon | The digital fence perimeter defined by 4 GPS vertices between Block A and Block B |
+| 📍 Red marker | Current position of the animal (ESP32-S3 device) inside the fence |
+| 🔵 Cyan circle | GPS accuracy radius — represents the margin of uncertainty of the GNSS receiver position |
+
+The GPS accuracy radius (cyan circle) is a fundamental indicator of signal quality: 
+the smaller the circle, the more precise the position fix. A larger radius indicates 
+reduced satellite visibility or signal interference, which may affect geofencing reliability.
+
+### 🔧 Terminal Node — LilyGO T-Beam Supreme ESP32-S3
+
 ![ESP32-S3](docs/images/ESP32.S3.jpeg)
 
-###  Gateway Advantech WISE-6610
-![Gateway](docs/images/Gateway.LORAWAN.jpeg)
-![Gateway](docs/images/GATEWAY.L.jpeg)
-![Gateway](docs/images/GATEWAY.jpeg)
+The terminal node is the core of the system — the electronic device integrated inside the animal's collar. It combines the **ESP32-S3** dual-core microcontroller (240 MHz), the **LoRa SX1262** radio transceiver, and the **Quectel L76K** GNSS receiver on a single board.
 
-### Node-RED Flow
+Connected via breadboard, the node integrates three external sensors:
+- **DHT22** — measures ambient temperature and relative humidity around the animal
+- **LM35** — analogue temperature sensor providing a secondary temperature reading
+- **Buzzer** — provides immediate audible alerts directly on the animal when a geofencing boundary is approached or breached
+
+The OLED display shows `PKT:5`, indicating that **5 LoRaWAN packets** have been successfully transmitted to the gateway. Every 10 seconds, the device reads all sensors, calculates its GPS position, runs the Ray Casting geofencing algorithm locally, and transmits a 15-byte encrypted binary payload via LoRaWAN at 868 MHz.
+
+###  LoRaWAN Gateway — Advantech WISE-6610 V2
+
+<img src="docs/images/Gateway.LORAWAN.jpeg" width="420"/>
+<img src="docs/images/GATEWAY.L.jpeg" width="420"/>
+<img src="docs/images/GATEWAY.jpeg" width="420"/>
+
+The **Advantech WISE-6610 V2** is the industrial-grade LoRaWAN gateway that acts as the bridge between the animal's terminal node and the cloud processing infrastructure.
+
+Equipped with the **SX1302 concentrator** chipset, it receives the encrypted LoRaWAN packets transmitted by the ESP32-S3 at **868 MHz** and forwards them over Ethernet via the **MQTT protocol** to the public **HiveMQ broker**. The gateway's rugged aluminium casing and DIN-rail mounting design make it suitable for outdoor agricultural environments.
+
+The side panel shows the gateway's connectivity interfaces: **ETH1/WAN** and **ETH2** Ethernet ports for network connection. The green **PWR LED** confirms the device is powered and fully operational, while the **DAT LED** indicates active data transmission.
+
+###  Node-RED Processing Flow
+
 ![Fluxo Node-RED](docs/images/Fluxo.dADOS.PNG)
 
-###  InfluxDB
+Node-RED is the central data processing engine of the system. The flow above shows the complete data pipeline from the moment a LoRaWAN packet arrives until it reaches the database and map:
+
+1. **MQTT In** — subscribes to the HiveMQ broker and receives the raw uplink payload
+2. **JSON** — parses the MQTT message into a structured JavaScript object
+3. **Function 1** — decodes the 15-byte binary payload, extracting GPS coordinates, temperature, humidity, distance, satellites, fix status, and fence vertices
+4. **Geofencing Ray Casting** — re-runs the Ray Casting algorithm in the cloud as a redundancy layer, determining the fence state (0, 1 or 2)
+5. **Worldmap** — updates the real-time map marker with the animal's current position and colour-coded state
+6. **InfluxDB** — stores all decoded fields as time-series data in the `MonitorizacaoAnimais_V2` bucket
+
+The debug nodes (green) allow real-time inspection of each step during development and testing.
+
+###  InfluxDB 2.x — Data Storage
+
 ![InfluxDB](docs/images/influxdbbb.jpeg)
+
+**InfluxDB 2.x** serves as the time-series database for the project. The Data Explorer shows the `MonitorizacaoAnimais_V2` bucket with the `animal` measurement receiving data every 10 seconds.
+
+All fields decoded from the LoRaWAN payload are stored as individual time-series records:
+
+| Field | Description |
+|-------|-------------|
+| `latitude` / `longitude` | Animal GPS position |
+| `cerca_lat_0–3` / `cerca_lon_0–3` | 4 fence vertex coordinates |
+| `temperatura` | Temperature reading (°C) |
+| `humidade` | Relative humidity (%) |
+| `distancia` | Distance to the nearest fence boundary (m) |
+| `satelites` | Number of GPS satellites in view |
+| `fix` | GPS fix status (0 = no fix, 1 = fix acquired) |
+| `estado_cerca` | Geofencing state (0 = safe, 1 = warning, 2 = breach) |
+
+This time-series structure allows Grafana to query and visualise all data historically and in real time.
+
+### 📊 Grafana Dashboard — Cerca Digital_Coleira
+
+The **Cerca Digital_Coleira** dashboard provides real-time monitoring of all animal data received from the LoRaWAN network. It is organised into 6 panels:
+
+- **Temperatura do animal** — gauge displaying the current temperature reading from the DHT22 sensor (°C), with colour thresholds from green (normal) to red (high)
+- **Humidade** — gauge displaying relative humidity (%), also colour-coded by threshold
+- **Distância ao Limite da Cerca** — gauge showing the calculated distance in metres between the animal's GPS position and the nearest    fence boundary, derived from the Ray Casting algorithm
+- **Satélite** — gauge showing the number of GPS satellites currently in view, used to assess fix quality
+- **Localização do Animal (Geomap)** — real-time map displaying the animal's position with a colour-coded marker:
+ 🟢 green (safe)
+ 🟡 orange (warning)
+ 🔴 red (breach)
+- **Histórico de Temperatura e Humidade** — time series chart showing temperature and humidity evolution over the last 30 minutes
+The dashboard auto-refreshes every **5 seconds** and queries InfluxDB with a **10-minute sliding window**.
+
+###  Test Results
+
+Field testing was conducted at the **EST campus of IPCB**, Castelo Branco, 
+in the open area between Block A and Block B, chosen for its clear sky 
+visibility and good GPS satellite coverage.
+
+The test validated the complete system pipeline across all three geofencing 
+states. GPS fix was successfully acquired with **11 to 16 satellites** in view, 
+ensuring reliable and accurate positioning throughout the session. The ESP32-S3 
+transmitted a 15-byte LoRaWAN payload every 10 seconds, which was received 
+without loss by the Advantech WISE-6610 V2 gateway and forwarded via MQTT 
+to the Node-RED processing flow.
+
+All payload fields were decoded correctly by Node-RED, stored in InfluxDB, 
+and visualised in real time on the Grafana dashboard with a 5-second refresh interval.
+
+**State 0 (Safe)** was confirmed when the animal remained inside the fence perimeter — 
+the Geomap displayed a green marker and the buzzer remained silent.
 
 ###  State — Secure
 ![Seguro](docs/images/seguro.jpeg)
 
+**State 1 (Warning)** was triggered as the device approached within 15 metres of 
+the fence boundary — the marker turned orange and the buzzer emitted 10 beeps, 
+alerting the animal before any breach occurred.
+
 ###  State — Risk Zone
 ![Zona de Risco](docs/images/zona.risco.jpeg)
+
+**State 2 (Breach)** was confirmed when the device crossed outside the defined 
+perimeter — the marker turned red, the buzzer emitted 20 beeps, and an automatic 
+email alert was received in Gmail within seconds of the breach being detected 
+by the Grafana alerting rule.
 
 ### State — Escape
 ![Fuga](docs/images/Fuga.jpeg)
 
-###  Dashboard — Alert
-![Alerta](docs/images/alertaaa.jpeg)
+All test cases passed successfully, confirming correct end-to-end operation 
+of the Ray Casting geofencing algorithm, LoRaWAN communication, 
+cloud processing pipeline, and real-time alert delivery.
 
-###  Email Alert
-![Email de Alerta](docs/images/Email.alerta.PNG)
+###  Grafana Alert Rule & Email Notification
+
+<table>
+<tr>
+<td align="center"><img src="docs/images/alertaaa.jpeg" width="380"/><br/><b>Grafana Alert Rule — Firing</b></td>
+<td align="center"><img src="docs/images/Email.alerta.PNG" width="380"/><br/><b>Automatic Email Alert — Gmail</b></td>
+</tr>
+</table>
+
+The alerting system is one of the most critical features of the project, ensuring 
+that the farmer is immediately notified when the animal exits the digital fence, 
+even when away from the monitoring dashboard.
+
+A **Grafana-managed alert rule** named `Alerta Cerca Digital` was configured to 
+query InfluxDB every **10 seconds** for the latest `estado_cerca` value stored 
+in the `MonitorizacaoAnimais_V2` bucket. The alert threshold is set to fire 
+whenever the geofencing state equals or exceeds **1**, covering both the warning 
+and breach conditions.
+
+When the alert fires, Grafana sends an automatic email via **Gmail SMTP (port 587)** 
+to the configured contact point. The email clearly identifies the alert as 
+`cerca-digital › DatasourceNoData`, displays the status as **Firing**, and includes 
+a descriptive summary: *"Animal fora da cerca ou perto do limite!"*, with additional 
+detail explaining that State 1 indicates the animal is near the boundary and 
+State 2 indicates the animal has escaped, instructing the farmer to check the 
+dashboard for the current position.
+
+During testing, the email alert was successfully received within seconds of the 
+breach being detected, confirming the reliability of the end-to-end alert pipeline 
+from InfluxDB query to email delivery.
+
+
