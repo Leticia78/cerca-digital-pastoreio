@@ -29,6 +29,23 @@ The real-time data processing and visualisation infrastructure consists of the *
 | Advantech WISE-6610 V2 | Industrial LoRaWAN gateway (SX1302 concentrator) |
 | FST 18650 Battery | 2600 mAh, 3.6V/4.2V |
 
+## Components
+
+###  Battery — FST 18650
+<img src="docs/images/battery.PNG" width="300"/>
+
+###  ESP32-S3 — LilyGO TTGO T-Beam Supreme
+<img src="docs/images/ESP32.S3TT.PNG" width="300"/>
+
+###  Buzzer
+<img src="docs/images/BUZZER.PNG" width="300"/>
+
+###  DHT22 — Temperature & Humidity Sensor
+<img src="docs/images/DHT22.PNG" width="300"/>
+
+###  LM35 — Analogue Temperature Sensor
+<img src="docs/images/LM35.PNG" width="300"/>
+
 ## LoRaWAN Communication
 
 | Parameter | Value |
